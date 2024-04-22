@@ -1,0 +1,50 @@
+version: "3.8"
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+services:
+  postgres:
+    image: postgres:latest
+    container_name: postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data2
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=keycloak
+      - POSTGRES_USER=keycloak
+      - POSTGRES_PASSWORD=password
+  infinispan:
+    image: infinispan/server:latest
+    container_name: infinispan
+    environment:
+      - USER=admin
+      - PASS=password
+    ports:
+      - "11222:11222"
+  keycloak:
+    image: quay.io/keycloak/keycloak:23.0.4
+    container_name: keycloak
+    environment:
+      - KEYCLOAK_ADMIN=admin
+      - KEYCLOAK_ADMIN_PASSWORD=admin
+      - KC_DB=postgres
+      - KC_DB_URL_HOST=postgres
+      - KC_DB_URL_DATABASE=keycloak
+      - KC_DB_USERNAME=keycloak
+      - KC_DB_PASSWORD=password
+      - KC_HEALTH_ENABLED=true
+      - KC_PROFILE=staging
+      - KC_CACHE_CONFIG=/opt/keycloak/infinispan.xml
+    ports:
+      - "8080:8080"
+    command: start-dev --log="console" --log-file=/var/log/ts --log-console-output=json
+    depends_on:
+      - postgres
+      - infinispan
+    volumes:
+      - ../target/keycloak-extensions-0.0.23.jar:/opt/keycloak/providers/keycloak-extensions.jar
+      - ../themes/:/opt/keycloak/themes
+      - ./infinispan.xml:/opt/keycloak/infinispan.xml

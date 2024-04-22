@@ -1,0 +1,3 @@
+tr.com.trs.extension.authenticator.usernamepassword.UsernamePasswordFactory
+tr.com.trs.extension.authenticator.iprestricted.IPAuthenticatorFactory
+tr.com.trs.extension.authenticator.customotp.ConditionalOtpAuthenticatorFactory
